@@ -158,15 +158,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'annotator/static/',
-    BASE_DIR / 'checker/static/',
-    BASE_DIR / 'configuration/static/',
-    BASE_DIR / 'get_imgs/static/',
-    BASE_DIR / 'crop_app/static/',
-    BASE_DIR / 'training/static/',
-    # os.path.join(BASE_DIR, 'static'),
-]
+# 各アプリ配下の static/ は django.contrib.staticfiles が自動探索する。
+# STATICFILES_DIRS に同じアプリのパスを重複登録せず、静的ファイルを
+# アプリディレクトリから一度だけ探索する。
 
 # プロジェクト追加画面ではフォルダ単位で大量の画像を選択するため、Djangoのmultipart層のファイル数上限は無効化する。
 # 画像種別や登録可否はconfiguration.add_project側で検証する。

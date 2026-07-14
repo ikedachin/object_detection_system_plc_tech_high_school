@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YOLOモデル学習</title>
     {% load static %}
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}">
     <style>
@@ -642,8 +642,8 @@
     });
   });
 </script>
-<script src="/static/training/train.js"></script>
-<script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'training/train.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script>
   // データ種別変更時にプロジェクトリストを再取得
   document.addEventListener('DOMContentLoaded', function() {

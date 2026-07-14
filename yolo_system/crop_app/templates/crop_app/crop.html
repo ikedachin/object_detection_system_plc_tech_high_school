@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}">
     <link rel="stylesheet" href="{% static 'libs/cropper/cropper.min.css' %}">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"> -->
-    <!-- <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.5.12/dist/cropper.css" onerror="console.warn('Cropper.js フォールバックCSS読み込み失敗')"> -->
     <style>
         /* 優しい赤系のカラーパレット */
         :root {
@@ -129,7 +127,6 @@
             background: #fff5f5;
         }
     </style>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet"> -->
     
     <!-- シンプルな画像表示CSS -->
 </head>
@@ -530,15 +527,12 @@
     <script src="{% static 'libs/cropper/cropper.min.js' %}"></script>
 
 
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> -->
-    
-    <!-- Cropper.js 読み込み確認と強化されたフォールバック -->
+    <!-- ローカル版 Cropper.js の読み込み確認 -->
     <script>
         // Cropper.js の読み込み状態を確認する関数
         function checkCropperAvailability() {
             if (typeof Cropper === 'undefined') {
-                console.warn('Cropper.js が読み込まれていません。フォールバックを実行します...');
+                console.error('ローカルの Cropper.js が読み込まれていません。');
                 return false;
             } else {
                 console.log('Cropper.js 読み込み完了 - バージョン:', Cropper.version || 'Unknown');
@@ -546,67 +540,17 @@
             }
         }
         
-        // 複数のフォールバックでCropper.jsを読み込む
-        function loadCropperFallback() {
-            const fallbackUrls = [
-                'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js',
-                'https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js',
-                'https://unpkg.com/cropperjs@1.5.12/dist/cropper.min.js'
-            ];
-            
-            let currentFallback = 0;
-            
-            function tryNextFallback() {
-                if (currentFallback >= fallbackUrls.length) {
-                    console.error('全てのフォールバックURL読み込み失敗');
-                    showCropperError();
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = fallbackUrls[currentFallback];
-                script.onload = function() {
-                    console.log(`Cropper.js フォールバック読み込み成功: ${fallbackUrls[currentFallback]}`);
-                    // CSS も追加で読み込み
-                    loadCropperCSS();
-                };
-                script.onerror = function() {
-                    console.warn(`フォールバック失敗: ${fallbackUrls[currentFallback]}`);
-                    currentFallback++;
-                    tryNextFallback();
-                };
-                document.head.appendChild(script);
-            }
-            
-            tryNextFallback();
-        }
-        
-        // Cropper.js CSS を確実に読み込む
-        function loadCropperCSS() {
-            const cssUrls = [
-                'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css',
-                'https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.css',
-                'https://unpkg.com/cropperjs@1.5.12/dist/cropper.css'
-            ];
-            
-            cssUrls.forEach(url => {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = url;
-                link.onerror = function() {
-                    console.warn('Cropper CSS 読み込み失敗:', url);
-                };
-                document.head.appendChild(link);
-            });
-        }
-        
         // エラーメッセージを表示
         function showCropperError() {
+            if (document.getElementById('cropper-load-error')) {
+                return;
+            }
             const alertDiv = document.createElement('div');
+            alertDiv.id = 'cropper-load-error';
             alertDiv.className = 'alert alert-danger mt-3';
             alertDiv.innerHTML = `
                 <strong>エラー:</strong> Cropper.js ライブラリが読み込まれていません。<br>
-                <small>ネットワーク接続を確認してページを再読み込みしてください。</small>
+                <small>ローカル静的ファイルを確認してページを再読み込みしてください。</small>
             `;
             const container = document.querySelector('.container');
             if (container) {
@@ -619,7 +563,7 @@
             // 少し遅延してからチェック（他のスクリプトの読み込み完了を待つ）
             setTimeout(() => {
                 if (!checkCropperAvailability()) {
-                    loadCropperFallback();
+                    showCropperError();
                 }
             }, 100);
         });
