@@ -21,9 +21,13 @@ projects/*/models/
 model/*.ipynb
 projects/*/*.jpg
 projects/*/*/*
+!projects/project_2026_goal/
+!projects/project_2026_goal/data_collection/
+!projects/project_2026_goal/data_collection/*.jpg
+
 yolo11n.pt
 uv.lock
-yolo_system/db.sqlite3
+# yolo_system/db.sqlite3
 yolo_system/*/migrations/*_initial.py
 yolo_system/*/migrations/__pycache__/
 
