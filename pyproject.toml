@@ -3,6 +3,7 @@ name = "object-detection-system"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+license = "AGPL-3.0-only"
 requires-python = ">=3.11"
 dependencies = [
     "channels>=4.2.2",

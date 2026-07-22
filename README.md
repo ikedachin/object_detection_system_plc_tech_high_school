@@ -1,7 +1,10 @@
-# 🚧 **under construction** 👷‍♀️
+# 🧑‍🎓 **学生教育用リポジトリ** 👩‍🎓
 # YOLOシステム
-ultralytics社のYOLOを**誰でも、簡単に**使えることを目的としたwebアプリです
-YOLOに関してはultralytics社のライセンスに準じます。
+一般学生に物体検出開発を体験してもらうためのリポジトリです。
+ultralytics社のYOLOを**誰でも、簡単に**使えることを目指しました。
+本プロジェクトは、AGPL-3.0で提供されるUltralytics YOLOを利用しています。
+利用・改変・再配布およびネットワーク経由での提供については、AGPL-3.0の条件に従ってください。
+モデルのウエイトは本リポジトリには含めておらず、`manage.py`の起動時に自動的にダウンロードされます。
 
 
 
@@ -377,5 +380,9 @@ http://127.0.0.1:8010/
       http://localhost:8000
       ```
 ### License
-MITライセンスとして公開します。
-ただし、本プログラム内で利用しているUltralytics YOLOはAGPLv3ライセンスです。YOLOの使用に関しては、Ultralytics社のライセンス条件に従ってください。
+
+本プロジェクトは、GNU Affero General Public License v3.0（AGPL-3.0）のもとで公開します。
+
+本プロジェクトは、AGPL-3.0で提供されるUltralytics YOLOを利用しています。利用・改変・再配布およびネットワーク経由での提供については、[LICENSE](LICENSE)に記載されたAGPL-3.0の条件に従ってください。
+
+本リポジトリに含まれる第三者ソフトウェアには、それぞれのライセンスが適用されます。著作権表示およびライセンス本文は、[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)を参照してください。
