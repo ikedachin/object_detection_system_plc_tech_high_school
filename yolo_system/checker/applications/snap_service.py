@@ -232,8 +232,23 @@ async def run_snap_backend() -> SnapResult:
             if not ret:
                 raise RuntimeError("画像のエンコードに失敗しました")
 
-            result = quality_verify.quality_verify_thr17(result_dict)
+            result = quality_verify.quality_verify_common(result_dict)
             print(f'Approval status: {result}')
+
+            # 追加部分 =========================
+            if isinstance(result_dict, dict):
+                result_dict = dict(sorted(result_dict.items()))
+                print(f'Inference result dict: {result_dict}')
+                sum_result, multiple_results = quality_verify.get_results_sum_multiple(result_dict)
+                print(f'Sum result: {sum_result}, Multiple results: {multiple_results}')
+                result_dict = {
+                    "足し算": sum_result,
+                    "掛け算": multiple_results,
+                }
+            # =========================
+
+            if not result:
+                result_dict = {}
 
             return SnapResult(
                 message='Snapshot taken and processed',

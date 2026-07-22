@@ -2,7 +2,7 @@
 YOLO:
   # model_path: "../model/runs/detect/thr17_20250616-19_480p_2/weights/best.pt"
   detect_config:
-    conf: 0.45  # confidence threshold
+    conf: 0.814  # confidence threshold
     # iou: 0.45  # IoU threshold for NMS
     save: False  # save the image
     save_txt: True  # save results to a text file

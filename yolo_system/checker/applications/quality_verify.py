@@ -11,10 +11,7 @@ def quality_verify_common(result_dict):
         return True
 
 
-# thr17の判定ロジック
-# result_dictは{'s': 8}のような形式で、keyは's'または'c'、valueは整数
-# 's'の場合は8が合格、'c'の場合は9が合格
-# それ以外は不合格
+
 def quality_verify_thr17(result_dict):
 
     if len(result_dict) == 1:
@@ -31,3 +28,15 @@ def quality_verify_thr17(result_dict):
                 return False
     else:
         return False
+
+def get_results_sum_multiple(result_dict):
+    print(f'Calculating sum and multiple for result_dict: {result_dict}')
+    sum_result, multiple_results = 0, 1
+    for key, value in result_dict.items():
+        if not isinstance(value, int):
+            raise ValueError(f"Value for key '{key}' is not an integer: {value}")
+        else:
+            dice_eyes = int(key.split('_')[1])
+            sum_result += dice_eyes * int(value)
+            multiple_results *= int(dice_eyes) ** int(value)
+    return sum_result, multiple_results
