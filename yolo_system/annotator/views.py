@@ -11,6 +11,7 @@ import json
 import shutil
 import random
 import mimetypes
+from pathlib import Path
 from .models import ImageFile, Label, Annotation, Project
 
 
@@ -21,7 +22,7 @@ def resolve_project_image_path(image, image_type):
 
     folder_name = 'cropped' if image_type == 'cropped' else 'data_collection'
     project_root_path = settings.PROJECTS_DIR / image.project.folder_name
-    image_path = project_root_path / folder_name / image.filename
+    image_path = project_root_path / folder_name / image.relative_image_path
     if not image_path.exists():
         raise Http404(f"{folder_name}の画像が見つかりません")
     return image_path
@@ -314,8 +315,9 @@ def split_dataset(request):
             for i, image in enumerate(images):
                 # 画像ファイルを読み込み
                 # print(f"[DEBUG {split_dataset.__name__}] 処理中の画像: {data['projectname']}, インデックス: {i+1}/{len(images)}")
-                src_img_path = settings.PROJECTS_DIR / data['projectname'] / sub_dir / image.filename
-                dst_img_path = os.path.join(target_img_dir, image.filename)
+                src_img_path = resolve_project_image_path(image, sub_dir)
+                dst_img_path = target_img_dir / image.relative_image_path
+                dst_img_path.parent.mkdir(parents=True, exist_ok=True)
 
                 # print(f"[DEBUG {split_dataset.__name__}] 処理中の画像: {src_img_path}, インデックス: {i+1}/{len(images)}")
                 # print(f"[DEBUG {split_dataset.__name__}] 処理中の画像: {image.filename}, 保存先: {dst_img_path}")
@@ -351,8 +353,9 @@ def split_dataset(request):
                     offset_y = paste_y / target_size
                 
                 # ラベルファイルを作成（座標を変換）
-                label_filename = os.path.splitext(image.filename)[0] + '.txt'
-                label_path = os.path.join(target_label_dir, label_filename)
+                label_filename = image.relative_image_path.with_suffix('.txt')
+                label_path = target_label_dir / label_filename
+                label_path.parent.mkdir(parents=True, exist_ok=True)
                 # print(f"[DEBUG {split_dataset.__name__}] ラベルファイル: {label_path}")
 
                 
@@ -557,6 +560,8 @@ def serve_image(request, filename):
     """プロジェクトの画像フォルダから画像を配信"""
     print(f"=== 画像リクエスト受信: {filename} ===")
     
+    if Path(filename).is_absolute() or '..' in Path(filename).parts:
+        raise Http404("画像パスが不正です")
     try:
         # まずデータベースから画像を検索
         image_file = ImageFile.objects.filter(filename=filename).first()
@@ -765,14 +770,18 @@ def load_project_images(request, project_id):
                 # print(f"{folder_type}フォルダをチェック: {folder_path}")
                 if os.path.exists(folder_path):
                     print(f"{folder_type}フォルダが存在します")
-                    files_in_folder = os.listdir(folder_path)
+                    files_in_folder = [p.relative_to(folder_path).as_posix()
+                                       for p in Path(folder_path).rglob('*') if p.is_file()]
                     # print(f"{folder_type}フォルダ内のファイル数: {len(files_in_folder)}")
                     for filename in files_in_folder:
                         file_path = os.path.join(folder_path, filename)
                         if os.path.isfile(file_path) and filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
                             # print(f"画像ファイル発見: {filename}")
                             # 画像ファイルが既に存在するかチェック
-                            if not ImageFile.objects.filter(filename=filename, project=project).exists():
+                            stored_path = Path(file_path).relative_to(settings.PROJECTS_DIR).as_posix()
+                            if not ImageFile.objects.filter(project=project).filter(
+                                Q(filename=stored_path) | Q(filename=filename)
+                            ).exists():
                                 try:
                                     # 画像の寸法を取得
                                     from PIL import Image
@@ -780,7 +789,7 @@ def load_project_images(request, project_id):
                                         width, height = img.size
                                     # ImageFileオブジェクトを作成
                                     ImageFile.objects.create(
-                                        filename=filename,
+                                        filename=stored_path,
                                         width=width,
                                         height=height,
                                         project=project
@@ -814,20 +823,20 @@ def get_thumbnail(request, image_id, cropped: str = "original"):
     # サムネイルのパスを生成
     thumbnail_path = os.path.join(settings.BASE_DIR.parent, 
                                   'projects', 
-                                  image.project.name, 
+                                  image.project.folder_name,
                                   'thumbnail', 
                                   'data_collection', 
-                                  image.filename
+                                  image.relative_image_path
                                   )
 
     if cropped == "cropped":
         # cropped画像のサムネイルパスを生成
         thumbnail_path = os.path.join(settings.BASE_DIR.parent, 
                                   'projects', 
-                                  image.project.name, 
+                                  image.project.folder_name,
                                   'thumbnail', 
                                   'cropped', 
-                                  image.filename
+                                  image.relative_image_path
                                   )
     
     # print(f"サムネイルパス: {thumbnail_path}, project: {image.project.name if image.project else 'None'}")
@@ -839,7 +848,7 @@ def get_thumbnail(request, image_id, cropped: str = "original"):
         # サムネイルが存在しない場合は生成
         from PIL import Image as PILImage
         try:
-            with PILImage.open(image.file_path) as img:
+            with PILImage.open(resolve_project_image_path(image, cropped)) as img:
                 img.thumbnail((150, 150), PILImage.Resampling.LANCZOS)
                 img.save(thumbnail_path, "JPEG")
         except Exception as e:

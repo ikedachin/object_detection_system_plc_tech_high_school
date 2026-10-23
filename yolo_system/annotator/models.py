@@ -122,10 +122,25 @@ class ImageFile(models.Model):
     
     def __str__(self):
         return self.filename
+
+    @property
+    def display_name(self):
+        return Path(self.filename).name
+
+    @property
+    def relative_image_path(self):
+        """画像種別フォルダ内の相対パス。従来のファイル名のみのデータにも対応。"""
+        path = Path(self.filename)
+        if self.project and path.parts[:1] == (self.project.folder_name,):
+            return Path(*path.parts[2:])
+        return path
     
     @property
     def file_path(self):
         from django.conf import settings
+
+        if self.project and Path(self.filename).parts[:1] == (self.project.folder_name,):
+            return str(settings.PROJECTS_DIR / self.filename)
         
         print(f"=== file_path プロパティ呼び出し: {self.filename} ===")
         

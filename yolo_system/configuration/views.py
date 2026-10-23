@@ -1059,7 +1059,7 @@ def add_project(request):
         for image_path in new_project_dir.rglob('*'):
             if not image_path.is_file() or image_path.suffix.lower() not in image_extensions:
                 continue
-            filename = image_path.name
+            filename = image_path.relative_to(projects_dir).as_posix()
             if ImageFile.objects.filter(filename=filename).exists():
                 skipped.append(filename)
                 continue

@@ -3,6 +3,7 @@ import tempfile
 from pathlib import Path
 
 from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from PIL import Image
@@ -70,3 +71,15 @@ class AnnotationImageSourceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse('annotator:get_thumbnail', args=[self.image.id, 'data_collection']))
         self.assertNotContains(response, reverse('annotator:serve_annotation_image', args=[self.image.id, 'data_collection']))
+
+    def test_relative_path_can_select_cropped_original(self):
+        self.image.filename = f'{self.project.folder_name}/data_collection/sample.png'
+        self.image.save()
+        response = self.client.get(reverse('annotator:serve_annotation_image', args=[self.image.id, 'cropped']))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.image_size_from_response(response), (30, 30))
+
+    def test_filename_keeps_global_unique_constraint(self):
+        other = Project.objects.create(name='other', folder_name='other')
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            ImageFile.objects.create(project=other, filename=self.image.filename, width=10, height=10)

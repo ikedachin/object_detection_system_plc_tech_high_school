@@ -97,12 +97,12 @@
                 <!-- グリッド表示 -->
                 <div class="row" id="images-grid">
                     {% for image in images %}
-                    <div class="col-md-3 mb-3 image-item" data-filename="{{ image.filename }}" data-width="{{ image.width }}" data-height="{{ image.height }}" data-annotated="{{ image.is_annotated|yesno:'true,false' }}">
+                    <div class="col-md-3 mb-3 image-item" data-filename="{{ image.display_name }}" data-width="{{ image.width }}" data-height="{{ image.height }}" data-annotated="{{ image.is_annotated|yesno:'true,false' }}">
                         <div class="card">
-                            <img src="{% url 'annotator:get_thumbnail' image.id cropped %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ image.filename }}">
-                            <!-- <img src="{{ projects_dir }} /{% if use_cropped %}/cropped{% else %}/data_collection{% endif %}/{{ image.filename }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ image.filename }}"> -->
+                            <img src="{% url 'annotator:get_thumbnail' image.id cropped %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ image.display_name }}">
+                            <!-- <img src="{{ projects_dir }} /{% if use_cropped %}/cropped{% else %}/data_collection{% endif %}/{{ image.display_name }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ image.display_name }}"> -->
                             <div class="card-body">
-                                <h6 class="card-title">{{ image.filename }}</h6>
+                                <h6 class="card-title">{{ image.display_name }}</h6>
                                 <p class="card-text">
                                     <small class="text-muted">{{ image.width }}x{{ image.height }}</small>
                                     {% if image.is_annotated %}
@@ -140,14 +140,14 @@
                 <!-- リスト表示 -->
                 <div class="list-group d-none" id="images-list">
                     {% for image in images %}
-                    <div class="list-group-item image-item" data-filename="{{ image.filename }}" data-width="{{ image.width }}" data-height="{{ image.height }}" data-annotated="{{ image.is_annotated|yesno:'true,false' }}">
+                    <div class="list-group-item image-item" data-filename="{{ image.display_name }}" data-width="{{ image.width }}" data-height="{{ image.height }}" data-annotated="{{ image.is_annotated|yesno:'true,false' }}">
                         <div class="row align-items-center">
                             <div class="col-md-2">
-                                <!-- <img src="/{{ current_project.folder_name }}/{% if use_cropped %}cropped{% else %}data_collection{% endif %}/{{ image.filename }}" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;" alt="{{ image.filename }}"> -->
-                                <img src="{% url 'annotator:get_thumbnail' image.id cropped %}" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;" alt="{{ image.filename }}">
+                                <!-- <img src="/{{ current_project.folder_name }}/{% if use_cropped %}cropped{% else %}data_collection{% endif %}/{{ image.display_name }}" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;" alt="{{ image.display_name }}"> -->
+                                <img src="{% url 'annotator:get_thumbnail' image.id cropped %}" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;" alt="{{ image.display_name }}">
                             </div>
                             <div class="col-md-6">
-                                <h6 class="mb-1">{{ image.filename }}</h6>
+                                <h6 class="mb-1">{{ image.display_name }}</h6>
                                 <p class="mb-1">
                                     <small class="text-muted">サイズ: {{ image.width }}x{{ image.height }}</small>
                                 </p>

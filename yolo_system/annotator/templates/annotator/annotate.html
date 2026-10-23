@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>アノテーション - {{ image.filename }}</title>
+    <title>アノテーション - {{ image.display_name }}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
@@ -18,7 +18,7 @@
             </a>
 
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text">{{ image.filename }}  </span>
+                <span class="navbar-text">{{ image.display_name }}  </span>
             </div>
             <a class="nav-link text-white" href="{% url 'configuration:configuration' %}">
                 <i class="bi bi-house"></i> 設定ページに戻る
@@ -213,7 +213,7 @@
         // 画像データとアノテーションデータをJSに渡す
         window.imageData = {
             id: {{ image.id|default:'null' }},
-            filename: "{{ image.filename|escapejs }}",
+            filename: "{{ image.display_name|escapejs }}",
             width: {{ image.width|default:'null' }},
             height: {{ image.height|default:'null' }},
             url: "{{ image_url|escapejs }}"

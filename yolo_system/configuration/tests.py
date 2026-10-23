@@ -80,7 +80,55 @@ class AddProjectTests(TestCase):
         self.assertEqual(data['registered_images'], 1)
         project = Project.objects.get(name='uploaded_project')
         self.assertTrue((project_dir / 'data_collection' / 'uploaded.png').exists())
-        self.assertTrue(ImageFile.objects.filter(project=project, filename='uploaded.png').exists())
+        self.assertTrue(ImageFile.objects.filter(project=project, filename='uploaded_project/data_collection/uploaded.png').exists())
+
+    def test_same_names_in_projects_and_subfolders_use_distinct_relative_paths(self):
+        from io import BytesIO
+        from annotator.models import Annotation, Label
+
+        source_dir = self.temp_dir / 'relative_source'
+        self.make_image(source_dir / 'shared.png', size=(20, 10))
+        self.make_image(source_dir / 'nested' / 'shared.png', size=(10, 20))
+        for project_name in ['relative_project_a', 'relative_project_b']:
+            self.track_project_dir(project_name)
+            response = self.client.post(reverse('configuration:add_project'), data={
+                'project_name': project_name, 'source_folder': str(source_dir),
+            })
+            self.assertTrue(response.json()['success'])
+            self.assertEqual(response.json()['registered_images'], 2)
+
+        project = Project.objects.get(name='relative_project_b')
+        image = ImageFile.objects.get(filename='relative_project_b/data_collection/nested/shared.png')
+        self.assertEqual(image.display_name, 'shared.png')
+        self.assertEqual(image.relative_image_path.as_posix(), 'nested/shared.png')
+        self.assertTrue(Path(image.file_path).is_file())
+        detail = self.client.get(reverse('annotator:annotate', args=[image.id, 'data_collection']))
+        self.assertEqual(detail.status_code, 200)
+        for url in [detail.context['image_url'], image.image_url,
+                    reverse('annotator:get_thumbnail', args=[image.id, 'data_collection'])]:
+            served = self.client.get(url)
+            self.assertEqual(served.status_code, 200)
+            with Image.open(BytesIO(served.content)) as img:
+                self.assertEqual(img.size, (10, 20))
+
+        reload_url = reverse('annotator:load_project_images', args=[project.id])
+        self.assertEqual(self.client.post(reload_url).json()['loaded_count'], 0)
+        image.delete()
+        self.assertEqual(self.client.post(reload_url).json()['loaded_count'], 1)
+        image = ImageFile.objects.get(filename='relative_project_b/data_collection/nested/shared.png')
+
+        label = Label.objects.create(project=project, name='object', is_active=True)
+        Annotation.objects.create(image=image, label=label, x_center=.5, y_center=.5, width=.2, height=.2)
+        image.is_annotated = True
+        image.save()
+        exported = self.client.post(reverse('annotator:split_dataset'), data={
+            'projectname': project.name, 'cropped': 'data_collection',
+            'split_ratio': 1, 'image_size': 32,
+        }, content_type='application/json')
+        self.assertEqual(exported.json()['status'], 'success')
+        output = self.projects_dir / project.folder_name / 'annotated' / 'data_collection'
+        self.assertTrue((output / 'images/train/nested/shared.png').exists())
+        self.assertTrue((output / 'labels/train/nested/shared.txt').exists())
 
     def test_add_project_registers_existing_project_folder_without_copying(self):
         project_dir = self.track_project_dir('existing_folder_project')
@@ -99,7 +147,7 @@ class AddProjectTests(TestCase):
         self.assertEqual(data['copied_files'], 1)
         self.assertEqual(data['registered_images'], 1)
         project = Project.objects.get(name='existing_folder_project')
-        self.assertTrue(ImageFile.objects.filter(project=project, filename='existing.png').exists())
+        self.assertTrue(ImageFile.objects.filter(project=project, filename='existing_folder_project/data_collection/existing.png').exists())
 
     def test_missing_source_folder_returns_error_without_creating_project(self):
         self.track_project_dir('missing_source_project')
