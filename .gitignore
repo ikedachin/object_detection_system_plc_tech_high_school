@@ -24,6 +24,12 @@ projects/*/*/*
 !projects/project_2026_goal/
 !projects/project_2026_goal/data_collection/
 !projects/project_2026_goal/data_collection/*.jpg
+!projects/project_2026_koka_high_school_50imgs/
+!projects/project_2026_koka_high_school_50imgs/data_collection/
+!projects/project_2026_koka_high_school_50imgs/data_collection/*.jpg
+!projects/project_2026_koka_high_school_50imgs/annotated/
+!projects/project_2026_koka_high_school_50imgs/annotated/.gitkeep
+
 
 yolo11n.pt
 uv.lock
